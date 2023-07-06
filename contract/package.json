@@ -29,7 +29,7 @@
     "@agoric/assert": "*",
     "@agoric/babel-parser": "^7.6.4",
     "@agoric/ertp": "*",
-    "@agoric/eventual-send": "*",
+    "@endo/eventual-send": "*",
     "@agoric/install-ses": "*",
     "@agoric/marshal": "*",
     "@agoric/notifier": "*",

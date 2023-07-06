@@ -6,7 +6,7 @@ import test from 'ava';
 import bundleSource from '@endo/bundle-source';
 
 import { Far } from '@agoric/marshal';
-import { E } from '@agoric/eventual-send';
+import { E } from '@endo/eventual-send';
 import { makeIssuerKit, AmountMath } from '@agoric/ertp';
 import buildManualTimer from '@agoric/zoe/tools/manualTimer.js';
 import { assertProposalShape } from '@agoric/zoe/src/contractSupport/index.js';
@@ -121,7 +121,7 @@ const makeFakePegasus = (t, zcf, shouldSucceed) => {
   });
 };
 
-test.only('zoe - watch Akash deployment, maxCheck=1, IBC transfer failed', async (t) => {
+test('zoe - watch Akash deployment, maxCheck=1, IBC transfer failed', async (t) => {
   t.plan(2);
   const { mint: aktMint, issuer: aktIssuer, brand: aktBrand } = makeIssuerKit(
     'fakeAkt',
