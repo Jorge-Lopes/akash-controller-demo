@@ -91,7 +91,7 @@ const start = (zcf) => {
     // register callback for deposited promise
     pendingDeposit = deposited.then(async () => {
       console.log('Transfer completed, checking result...');
-      const remains = await E(transferSeatP).getCurrentAllocation();
+      const remains = await E(transferSeatP).getCurrentAllocationJig();
       const transferOk = AmountMath.isEmpty(remains.Transfer);
 
       if (transferOk) {
