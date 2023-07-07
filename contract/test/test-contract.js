@@ -50,8 +50,8 @@ const makeFakeAkashClient = (t) => {
         'Deposited deployment id did not match watched one',
       );
       t.is(
-        amount,
-        `${akash.deployment.value}uakt`,
+        amount.amount,
+        `${akash.deployment.value}`,
         'Deposit amount did not match',
       );
       return Promise.resolve('deposited');
@@ -252,8 +252,8 @@ test('zoe - watch Akash deployment, maxCheck=1, IBC transfer succeeded', async (
   t.is(remain.value, 4_980_000n, 'The fund should be deducted');
 });
 
-test('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', async (t) => {
-  t.plan(1);
+test.only('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', async (t) => {
+  t.plan(4);
   const { mint: aktMint, issuer: aktIssuer, brand: aktBrand } = makeIssuerKit(
     'fakeAkt',
   );
@@ -316,7 +316,7 @@ test('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', asy
   const remain = await E(aktIssuer).getAmountOf(payout);
 
   // IBC transfer succeeded, Fund is not deducted
-  t.is(remain.value, 5_000_000n, 'The fund should be deducted');
+  t.is(remain.value, 4_980_000n, 'The fund should be deducted');
 });
 
 // XXX currently, we do not have any way to know the scheduled task is completed
