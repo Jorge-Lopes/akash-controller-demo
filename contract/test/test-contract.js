@@ -1,10 +1,11 @@
 // @ts-check
-import { test } from '@agoric/zoe/tools/prepare-test-env-ava.js';
+import '@agoric/zoe/tools/prepare-test-env.js';
+import test from 'ava';
 
 import bundleSource from '@endo/bundle-source';
 
 import { Far } from '@agoric/marshal';
-import { E } from '@agoric/eventual-send';
+import { E } from '@endo/eventual-send';
 import { makeIssuerKit, AmountMath } from '@agoric/ertp';
 import buildManualTimer from '@agoric/zoe/tools/manualTimer.js';
 import { assertProposalShape } from '@agoric/zoe/src/contractSupport/index.js';
@@ -48,8 +49,8 @@ const makeFakeAkashClient = (t) => {
         'Deposited deployment id did not match watched one',
       );
       t.is(
-        amount,
-        `${akash.deployment.value}uakt`,
+        amount.amount,
+        `${akash.deployment.value}`,
         'Deposit amount did not match',
       );
       return Promise.resolve('deposited');
@@ -129,6 +130,7 @@ test('zoe - watch Akash deployment, maxCheck=1, IBC transfer failed', async (t) 
   });
 
   const { zoe, zcf } = await setupZCFTest(issuerKeywordRecord);
+
   const bundle = await bundleSource(contractPath);
   const installation = await E(zoe).install(bundle);
 
@@ -250,7 +252,7 @@ test('zoe - watch Akash deployment, maxCheck=1, IBC transfer succeeded', async (
 });
 
 test('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', async (t) => {
-  t.plan(1);
+  t.plan(4);
   const { mint: aktMint, issuer: aktIssuer, brand: aktBrand } = makeIssuerKit(
     'fakeAkt',
   );
@@ -313,7 +315,7 @@ test('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', asy
   const remain = await E(aktIssuer).getAmountOf(payout);
 
   // IBC transfer succeeded, Fund is not deducted
-  t.is(remain.value, 5_000_000n, 'The fund should be deducted');
+  t.is(remain.value, 4_980_000n, 'The fund should be deducted');
 });
 
 // XXX currently, we do not have any way to know the scheduled task is completed

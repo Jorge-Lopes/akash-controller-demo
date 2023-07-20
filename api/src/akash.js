@@ -3,8 +3,8 @@ import { Akash } from 'akashjs';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
 const DEFAULT_MNEMONIC =
-  'enlist hip relief stomach skate base shallow young switch frequent cry park';
-const DEFAULT_AKASH_RPC = 'http://rpc.edgenet-1.ewr1.aksh.pw:26657';
+  'vibrant scorpion faint industry lobster kingdom common salad birth panic crazy indoor laptop inherit busy damage scrap success aware grief maid odor risk wine';
+const DEFAULT_AKASH_RPC = 'http://rpc.testnet-02.aksh.pw:26657';
 
 const initClient = async (mnemonic, rpcEndpoint) => {
   const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
@@ -18,7 +18,7 @@ const initClient = async (mnemonic, rpcEndpoint) => {
   return { akash, address };
 };
 
-export const bootPlugin = () => {
+const bootPlugin = () => {
   // console.error('booting akashClient');
   return Far('plugin', {
     /**
@@ -81,3 +81,5 @@ export const bootPlugin = () => {
     },
   });
 };
+
+export default bootPlugin;
