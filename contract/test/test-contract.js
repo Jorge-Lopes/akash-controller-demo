@@ -1,5 +1,4 @@
 // @ts-check
-import '@endo/init/pre-bundle-source.js';
 import '@agoric/zoe/tools/prepare-test-env.js';
 import test from 'ava';
 
@@ -131,7 +130,7 @@ test('zoe - watch Akash deployment, maxCheck=1, IBC transfer failed', async (t) 
   });
 
   const { zoe, zcf } = await setupZCFTest(issuerKeywordRecord);
-  
+
   const bundle = await bundleSource(contractPath);
   const installation = await E(zoe).install(bundle);
 
@@ -252,7 +251,7 @@ test('zoe - watch Akash deployment, maxCheck=1, IBC transfer succeeded', async (
   t.is(remain.value, 4_980_000n, 'The fund should be deducted');
 });
 
-test.only('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', async (t) => {
+test('zoe - watch Akash deployment, maxCheck=1, current Fund is sufficient', async (t) => {
   t.plan(4);
   const { mint: aktMint, issuer: aktIssuer, brand: aktBrand } = makeIssuerKit(
     'fakeAkt',

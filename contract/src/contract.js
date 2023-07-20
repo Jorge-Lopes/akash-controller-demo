@@ -117,6 +117,7 @@ const start = (zcf) => {
 
   const checkAndFund = async () => {
     // deployment balance type DecCoin
+
     const balance = await E(akashClient).getDeploymentFund(deploymentId);
     const amount = BigInt(balance.amount) / 1_000_000_000_000_000_000n;
 
@@ -161,7 +162,16 @@ const start = (zcf) => {
 
   const startWatchingDeployment = async () => {
     // init the client
-    await E(akashClient).initialize();
+    await E(akashClient)
+      .initialize()
+      .then((result) => console.log({ result }))
+      .catch((err) => {
+        console.error(`Could not initialize the akash client`);
+        console.error(err);
+        throw err;
+      });
+
+    console.log('Log: akashClient initialized');
 
     // register next call
     await registerNextWakeupCheck().catch((err) => {
@@ -177,8 +187,9 @@ const start = (zcf) => {
       give: { Fund: null },
     });
 
+    console.log('Log: start watching deployment');
+
     controllerSeat = seat;
-    // start watching deployment
     startWatchingDeployment();
 
     return defaultAcceptanceMsg;
@@ -189,8 +200,13 @@ const start = (zcf) => {
     'watchAkashDeployment',
   );
 
+  const creatorFacet = {};
+  const publicFacet = {};
+
   return harden({
     creatorInvitation,
+    creatorFacet, // optional
+    publicFacet, // optional
   });
 };
 
