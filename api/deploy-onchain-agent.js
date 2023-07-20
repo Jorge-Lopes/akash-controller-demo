@@ -1,68 +1,44 @@
-// @ts-check
-/* eslint-env node */
-// Agoric Dapp api deployment script
-
-import { E } from '@agoric/eventual-send';
+import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp';
 import { observeNotifier } from '@agoric/notifier';
-
 import '@agoric/zoe/exported.js';
-
-import installationConstants from '../conf/installationConstants.mjs';
-
-const akt = harden({
-  peg: {
-    name: 'peg-channel-0-uakt',
-  },
-  wallet: {
-    pursePetName: 'Akash Deployment Fund',
-  },
-  payment: {
-    value: 10_000n,
-  },
-});
-
-// deploy.js runs in an ephemeral Node.js outside of swingset. The
-// spawner runs within ag-solo, so is persistent.  Once the deploy.js
-// script ends, connections to any of its objects are severed.
+import deployConfig from './deploy-config.js';
+import installationConstants from '../conf/installationConstants.js'; 
 
 /**
- * @typedef {Object} DeployPowers The special powers that `agoric deploy` gives us
- * @property {(path: string) => { moduleFormat: string, source: string }} bundleSource
- * @property {(path: string, opts?: any) => Promise<any>} installUnsafePlugin
- * @property {(path: string, format?: any) => string} pathResolve
+ * @param {Promise<{zoe: ERef<ZoeService>, board: ERef<Board>, agoricNames:
+ * object, wallet: ERef<object>, faucet: ERef<object>}>} homePromise
  */
+const deployApi = async (homePromise, { installUnsafePlugin }) => {
+  const { zoe, wallet, board, chainTimerService, scratch, agoricNames } = E.get(
+    homePromise,
+  );
 
-/**
- * @param {any} homePromise A promise for the references
- * available from REPL home
- * @param {DeployPowers} powers
- */
-export default async function deployApi(homePromise, { installUnsafePlugin }) {
-  // Let's wait for the promise to resolve.
-  const home = await homePromise;
-
-  // Unpack the references.
-  const { zoe, wallet, board, chainTimerService, scratch, agoricNames } = home;
+  const {
+    akash: {
+      remoteAsset,
+    },
+    akashAccount,
+  } = deployConfig;
 
   console.log('Finding the akt fund purse');
-  const purseP = E(E(wallet).getAdminFacet()).getPurse(akt.wallet.pursePetName);
+  const purseP = E(wallet).getPurse(remoteAsset.keyword);
 
   console.log('Finding the aktPeg, pegasus instance...');
   const [aktPeg, aktBrand, instance] = await Promise.all([
-    E(scratch).get(akt.peg.name),
+    E(scratch).get(remoteAsset.pegId),
     E(purseP).getAllegedBrand(),
     E(agoricNames).lookup('instance', 'Pegasus'),
   ]);
 
   assert(aktPeg, 'You may need to peg the `uakt` first');
-  assert(aktBrand, `No purse ${akt.wallet.pursePetName} found`);
-  const pegasus = await E(home.zoe).getPublicFacet(instance);
+  assert(aktBrand, `No purse ${remoteAsset.keyword} found`);
+  const pegasus = await E(zoe).getPublicFacet(instance);
   const aktIssuer = await E(pegasus).getLocalIssuer(aktBrand);
 
-  const mnemonic = process.env.AKASH_MNEMNONIC;
-  const rpcEndpoint = process.env.AKASH_RPC_ENDPOINT;
-  const deploymentId = process.env.AKASH_WATCHED_DSEQ;
+  const mnemonic = akashAccount.mnemonic;
+  const rpcEndpoint = akashAccount.rpcEndpoint;
+  const deploymentId = akashAccount.dseq;
 
   assert(mnemonic, 'AKASH_MNEMNONIC env variables must not be empty');
   assert(rpcEndpoint, 'AKASH_RPC_ENDPOINT env variables must not be empty');
@@ -73,15 +49,20 @@ export default async function deployApi(homePromise, { installUnsafePlugin }) {
     rpcEndpoint,
   }).catch((e) => console.error(`${e}`));
 
+  console.log('akashClient installed');
+
   const { INSTALLATION_BOARD_ID } = installationConstants;
   const installation = await E(board).getValue(INSTALLATION_BOARD_ID);
 
   const issuerKeywordRecord = harden({
     Fund: aktIssuer,
   });
+
+  const timeAuthority = await chainTimerService;
+
   const terms = harden({
     akashClient,
-    timeAuthority: chainTimerService,
+    timeAuthority,
     minimalFundThreshold: 6_000_000n,
     depositValue: 5_000n,
     checkInterval: 15n,
@@ -101,7 +82,7 @@ export default async function deployApi(homePromise, { installUnsafePlugin }) {
   console.log('Controller instance started');
 
   // setup the Fund for this contract
-  const amount = harden(AmountMath.make(aktBrand, akt.payment.value));
+  const amount = harden(AmountMath.make(aktBrand, 1_000n));
   const payment = await E(purseP).withdraw(amount);
   const proposal = harden({
     give: {
@@ -116,7 +97,7 @@ export default async function deployApi(homePromise, { installUnsafePlugin }) {
   const seatP = E(zoe).offer(creatorInvitation, proposal, paymentRecords);
 
   observeNotifier(
-    E(seatP).getNotifier(),
+    E(seatP).getAllocationNotifierJig(),
     harden({
       fail: (reason) => {
         console.log('Contract failed', reason);
@@ -125,9 +106,10 @@ export default async function deployApi(homePromise, { installUnsafePlugin }) {
   );
 
   console.log('Waiting for result...');
-  await E(seatP).getOfferResult();
+  const result = await E(seatP).getOfferResult();
+  console.log(result);
 
-  console.log('Waiting for payout');
+  console.log('Waiting for payout...');
   const payout = await E(seatP).getPayout('Fund');
   const remain = await E(aktIssuer).getAmountOf(payout);
 
@@ -137,4 +119,6 @@ export default async function deployApi(homePromise, { installUnsafePlugin }) {
     await E(purseP).deposit(payout);
     console.log('Deposit back');
   }
-}
+};
+
+export default deployApi;
