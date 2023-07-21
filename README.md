@@ -1,43 +1,11 @@
-# Akash controller Dapp
+# Akash controller Demo
 
-TL;DR:
+This repository codebase was designed to showcase the capabilities of the [dapp-akash-controller](https://github.com/simpletrontdip/dapp-akash-controller). The original code has been carefully adapted and modified to ensure compatibility with a more recent SDK version.
+   
+The agoric-sdk version used during its development was `0.18.2`, and the current commit in its Git repository is `agoric-upgrade-8-326-g65d3f14c8` of the `community-dev` branch.
 
-Demo app controls an Akash account, watches for deployment fund, deposit to it when needed.
+Please note that this repository serves as a demonstration, which guide and documentation can be found [here](https://github.com/Jorge-Lopes/agoric-components/tree/main/akash-controller), and the code is intended for illustrative purposes only. 
 
-## Demo Setup
+Feel free to explore, experiment, and provide feedback. We appreciate your valuable input.
 
-1. Create IBC channel between Akash(testnet) <-> Agoric(local)
-
-- Run an Akash node (current running node does not support gRPC)
-- Setup hermes accordingly
-- Run task to create channel
-
-2. Peg AKT from IBC connection to Agoric, by Pegasus
-
-- Provision a Agoric account with sufficient permission
-- Peg the AKT (as the Pegasus documentation)
-- Import the issuer
-- Create the fund `purse`
-
-3. Send some AKT to Agoric wallet (the pegged coin)
-
-- Run the relayer
-- Setup Akash wallet correctly in keychains
-- Send by CLI with correct channel setup
-
-4. Create a deployment in Akash side (off topic)
-
-- Create an Akash account, get some AKT from faucet
-- Create cert, bid, deployment SDL as documentation
-- Create the deployment
-
-5. Start the contract with Akash secrets, created deploymentId
-
-- Export the env variables
-- Deploy the `contract`
-- Deploy the api `on-chain` or `off-chain`
-
-6. Check for changes in Akash deployment
-
-- Take a note before transfering
-- Check the change
+Happy coding and exploring!
